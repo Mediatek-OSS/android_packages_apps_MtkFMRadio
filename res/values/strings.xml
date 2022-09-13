@@ -158,4 +158,9 @@
     <string name="FMR_EM_DEFAULT_VALUE" translatable="false">0</string>
     <!-- Runtime Permission -->
     <string name="missing_required_permission" translatable="false">Permissions denied. You can change them in Settings > Apps.</string>
+
+    <!-- Notification strings added for android N -->
+    <string name="previous_channel">Previous</string>
+    <string name="stop_fm">Stop</string>
+    <string name="next_channel">Next</string>
 </resources>
