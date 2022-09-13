@@ -105,40 +105,50 @@ static struct fm_fake_channel mt6632_fake_ch[] = MT6632_FM_FAKE_CHANNEL;
 
 static struct fm_fake_channel_t fake_ch_info = {0, 0};
 
-int CUST_get_cfg(struct CUST_cfg_ds *cfg)
+void CUST_update_cfg(struct CUST_cfg_ds *cfg, int chipid)
 {
-    char val[PROPERTY_VALUE_MAX] = {0};
     struct fm_fake_channel *fake_ch = NULL;
 
-    cfg->chip = FM_CHIP_UNSUPPORTED;
-    if (property_get("persist.vendor.connsys.fm_chipid", val, NULL)) {
-        if (strcmp(val, "soc") == 0) {
-            cfg->chip = FM_CHIP_MT6580;
-            fake_ch = mt6580_fake_ch;
-        } else if (strcmp(val, "mt6620") == 0) {
-            cfg->chip = FM_CHIP_MT6620;
-            fake_ch = mt6620_fake_ch;
-        } else if (strcmp(val, "mt6627") == 0) {
-            cfg->chip = FM_CHIP_MT6627;
-            fake_ch = mt6627_fake_ch;
-        } else if (strcmp(val, "mt6628") == 0) {
-            cfg->chip = FM_CHIP_MT6628;
-            fake_ch = mt6628_fake_ch;
-        } else if (strcmp(val, "mt6630") == 0) {
-            cfg->chip = FM_CHIP_MT6630;
-            fake_ch = mt6630_fake_ch;
-        } else if (strcmp(val, "mt6631") == 0) {
-            cfg->chip = FM_CHIP_MT6631;
-            fake_ch = mt6631_fake_ch;
-        } else if (strcmp(val, "mt6632") == 0) {
-            cfg->chip = FM_CHIP_MT6632;
-            fake_ch = mt6632_fake_ch;
-        } else if (strcmp(val, "mt6635") == 0) {
-            cfg->chip = FM_CHIP_MT6635;
-            fake_ch = mt6631_fake_ch;
-        }
+    LOGI("update connsys chipid=0x%x\n", chipid);
+
+    switch (chipid)
+    {
+    case FM_CHIP_MT6580:
+        cfg->chip = FM_CHIP_MT6580;
+        fake_ch = mt6580_fake_ch;
+        break;
+    case FM_CHIP_MT6620:
+        cfg->chip = FM_CHIP_MT6620;
+        fake_ch = mt6620_fake_ch;
+        break;
+    case FM_CHIP_MT6627:
+        cfg->chip = FM_CHIP_MT6627;
+        fake_ch = mt6627_fake_ch;
+        break;
+    case FM_CHIP_MT6628:
+        cfg->chip = FM_CHIP_MT6628;
+        fake_ch = mt6628_fake_ch;
+        break;
+    case FM_CHIP_MT6630:
+        cfg->chip = FM_CHIP_MT6630;
+        fake_ch = mt6630_fake_ch;
+        break;
+    case FM_CHIP_MT6631:
+        cfg->chip = FM_CHIP_MT6631;
+        fake_ch = mt6631_fake_ch;
+        break;
+    case FM_CHIP_MT6632:
+        cfg->chip = FM_CHIP_MT6632;
+        fake_ch = mt6632_fake_ch;
+        break;
+    case FM_CHIP_MT6635:
+        cfg->chip = FM_CHIP_MT6635;
+        fake_ch = mt6631_fake_ch;
+        break;
+    default:
+        LOGE("not support chipid=0x%x\n", chipid);
+        break;
     }
-    LOGI("CONSYS CHIP ID=%s\n", val);
 
     cfg->band = FM_RAIDO_BAND;  // 1, UE; 2, JAPAN; 3, JAPANW
 
@@ -174,5 +184,48 @@ int CUST_get_cfg(struct CUST_cfg_ds *cfg)
     }
 
     cfg->fake_chan = &fake_ch_info;
+}
+
+int CUST_get_cfg(struct CUST_cfg_ds *cfg)
+{
+    char val[PROPERTY_VALUE_MAX] = {0};
+    int chipid = FM_CHIP_UNSUPPORTED;
+
+    if (property_get("persist.vendor.connsys.fm_chipid", val, NULL)) {
+        if (strcmp(val, "soc") == 0) {
+            chipid = FM_CHIP_MT6580;
+        } else if (strcmp(val, "mt6620") == 0) {
+            chipid = FM_CHIP_MT6620;
+        } else if (strcmp(val, "mt6627") == 0) {
+            chipid = FM_CHIP_MT6627;
+        } else if (strcmp(val, "mt6628") == 0) {
+            chipid = FM_CHIP_MT6628;
+        } else if (strcmp(val, "mt6630") == 0) {
+            chipid = FM_CHIP_MT6630;
+        } else if (strcmp(val, "mt6631") == 0) {
+            chipid = FM_CHIP_MT6631;
+        } else if (strcmp(val, "mt6632") == 0) {
+            chipid = FM_CHIP_MT6632;
+        } else if (strcmp(val, "mt6635") == 0) {
+            chipid = FM_CHIP_MT6635;
+        }
+    }
+
+    if (chipid == FM_CHIP_UNSUPPORTED) {
+        if (property_get("vendor.connsys.adie.chipid", val, NULL)) {
+            if (strcmp(val, "0x6631") == 0) {
+                chipid = FM_CHIP_MT6631;
+            } else if (strcmp(val, "0x6635") == 0) {
+                chipid = FM_CHIP_MT6635;
+            } else {
+                LOGE("not support chipid=%s\n", val);
+            }
+        } else {
+            LOGE("get vendor.connsys.adie.chipid fail\n");
+        }
+    }
+
+    CUST_update_cfg(cfg, chipid);
+
     return 0;
 }

@@ -1197,6 +1197,8 @@ public class FmMainActivity extends Activity implements FmFavoriteEditDialog.Edi
     private void refreshPopupMenuItem(boolean enabled) {
         if (null != mMenuItemStationlList) {
             mMenuItemStartRecord.setEnabled(enabled);
+            mMenuItemRdStereo.setEnabled(enabled);
+            mMenuItemRdMono.setEnabled(enabled);
         }
     }
 
@@ -1429,62 +1431,12 @@ public class FmMainActivity extends Activity implements FmFavoriteEditDialog.Edi
      * start recording
      */
     private void startRecording() {
-        int readExtStorage = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
-        int writeExtStorage = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        //int readMediaAudio = checkSelfPermission(android.Manifest.permission.READ_MEDIA_AUDIO);
-        List<String> mPermissionStrings = new ArrayList<String>();
-        boolean mRequest = false;
-
-       if (readExtStorage != PackageManager.PERMISSION_GRANTED) {
-            mPermissionStrings.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            mRequest = true;
-        }
-        if (writeExtStorage != PackageManager.PERMISSION_GRANTED) {
-            mPermissionStrings.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            mRequest = true;
-        }
-     /* if (readMediaAudio != PackageManager.PERMISSION_GRANTED) {
-            mPermissionStrings.add(android.Manifest.permission.READ_MEDIA_AUDIO);
-            mRequest = true;
-        }
-        */
-        if (mRequest == true) {
-            String[] mPermissionList = new String[mPermissionStrings.size()];
-            mPermissionList = mPermissionStrings.toArray(mPermissionList);
-            requestPermissions(mPermissionList, PERMISSION_REQUEST_CODE_RECORDING);
-            return;
-        }
         Intent recordIntent = new Intent(this, FmRecordActivity.class);
         recordIntent.putExtra(FmStation.CURRENT_STATION, mCurrentStation);
         startActivityForResult(recordIntent, REQUEST_CODE_RECORDING);
     }
 
     private void openSavedRecordings() {
-        int readExtStorage = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
-        int writeExtStorage = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        //int readMediaAudio = checkSelfPermission(android.Manifest.permission.READ_MEDIA_AUDIO);
-        List<String> mPermissionStrings = new ArrayList<String>();
-        boolean mRequest = false;
-
-       if (readExtStorage != PackageManager.PERMISSION_GRANTED) {
-            mPermissionStrings.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            mRequest = true;
-        }
-        if (writeExtStorage != PackageManager.PERMISSION_GRANTED) {
-            mPermissionStrings.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            mRequest = true;
-        }
-      /*if (readMediaAudio != PackageManager.PERMISSION_GRANTED) {
-            mPermissionStrings.add(android.Manifest.permission.READ_MEDIA_AUDIO);
-            mRequest = true;
-        }
-        */
-        if (mRequest == true) {
-            String[] mPermissionList = new String[mPermissionStrings.size()];
-            mPermissionList = mPermissionStrings.toArray(mPermissionList);
-            requestPermissions(mPermissionList, PERMISSION_REQUEST_CODE_SAVED_RECORDING);
-            return;
-        }
         Intent playMusicIntent = new Intent(Intent.ACTION_VIEW);
                 int playlistId = FmRecorder.getPlaylistId(mContext);
                 Bundle extras = new Bundle();
@@ -1495,7 +1447,7 @@ public class FmMainActivity extends Activity implements FmFavoriteEditDialog.Edi
                             "com.google.android.music.ui.TrackContainerActivity");
                     playMusicIntent.setType("vnd.android.cursor.dir/playlist");
                     startActivity(playMusicIntent);
-                } catch (IllegalArgumentException | ActivityNotFoundException e1) {
+                } catch (ActivityNotFoundException e1) {
                     try {
                         playMusicIntent = new Intent();
                         Bundle extraData = new Bundle();
@@ -1544,40 +1496,6 @@ public class FmMainActivity extends Activity implements FmFavoriteEditDialog.Edi
             } else if (!mShowPermission) {
                 showToast(getString(R.string.missing_required_permission));
             }
-        } else if (requestCode == PERMISSION_REQUEST_CODE_RECORDING) {
-            for (int counter = 0; counter < permissions.length; counter++) {
-                boolean permissionGranted = false;
-                permissionGranted = (grantResults[counter] ==
-                                         PackageManager.PERMISSION_GRANTED);
-                granted = granted && permissionGranted;
-                if (!permissionGranted) {
-                    mShowPermission = mShowPermission && shouldShowRequestPermissionRationale(
-                                      permissions[counter]);
-                }
-            }
-            Log.i(TAG, "<onRequestPermissionsResult> Record audio granted" + granted);
-            if (granted == true) {
-                startRecording();
-            } else if (!mShowPermission) {
-                showToast(getString(R.string.missing_required_permission));
-            }
-        } else if (requestCode == PERMISSION_REQUEST_CODE_SAVED_RECORDING) {
-            for (int counter = 0; counter < permissions.length; counter++) {
-                boolean permissionGranted = false;
-                permissionGranted = (grantResults[counter] ==
-                                             PackageManager.PERMISSION_GRANTED);
-                granted = granted && permissionGranted;
-                if (!permissionGranted) {
-                    mShowPermission = mShowPermission && shouldShowRequestPermissionRationale(
-                                      permissions[counter]);
-                }
-            }
-            Log.i(TAG, "<onRequestPermissionsResult> Read/Write permission granted" + granted);
-            if (granted == true) {
-                openSavedRecordings();
-            } else if (!mShowPermission) {
-                showToast(getString(R.string.missing_required_permission));
-            }
         }
     }
 
@@ -1587,7 +1505,8 @@ public class FmMainActivity extends Activity implements FmFavoriteEditDialog.Edi
      * @return whether success
      */
     public void setStereoMono(boolean isMono) {
-        mService.setStereoMono(isMono);
+        if(mService != null)
+            mService.setStereoMonoAsync(isMono);
     }
 
     /**

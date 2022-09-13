@@ -55,6 +55,10 @@ int FMR_get_cfgs(int idx)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -ERR_INVALID_PARA;
+    }
+
     CUST_get_cfg(&(pfmr_data[idx]->cfg_data));
     LOGI("OK\n");
 
@@ -128,7 +132,11 @@ fail:
 int FMR_open_dev(int idx)
 {
     int ret = 0;
-    int real_chip;
+    int real_chip = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     FMR_ASSERT(FMR_cbk_tbl(idx).open_dev);
 
@@ -141,7 +149,12 @@ int FMR_open_dev(int idx)
     //Check if customer's cfg matchs driver.
     ret = FMR_get_chip_id(idx, &real_chip);
     if (FMR_chip(idx) != real_chip) {
-        LOGE("%s, Chip config error. 0x%x\n", __func__, real_chip);
+        LOGE("%s, 0x%x != 0x%x, reinit cfg.\n", __func__, FMR_chip(idx), real_chip);
+        CUST_update_cfg(&(pfmr_data[idx]->cfg_data), real_chip);
+    }
+    if (FMR_chip(idx) != real_chip) {
+        LOGE("%s, Chip config error. 0x%x != 0x%x\n", __func__,
+             FMR_chip(idx), real_chip);
         ret = FMR_cbk_tbl(idx).close_dev(FMR_fd(idx));
         return ret;
     }
@@ -154,6 +167,10 @@ int FMR_close_dev(int idx)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).close_dev);
     ret = FMR_cbk_tbl(idx).close_dev(FMR_fd(idx));
     LOGD("%s, [fd=%d] [ret=%d]\n", __func__, FMR_fd(idx), ret);
@@ -163,6 +180,10 @@ int FMR_close_dev(int idx)
 int FMR_pwr_up(int idx, int freq)
 {
     int ret = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     FMR_ASSERT(FMR_cbk_tbl(idx).pwr_up);
 
@@ -185,6 +206,10 @@ int FMR_pwr_down(int idx, int type)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).pwr_down);
     ret = FMR_cbk_tbl(idx).pwr_down(FMR_fd(idx), type);
     LOGD("%s, [ret=%d]\n", __func__, ret);
@@ -194,6 +219,10 @@ int FMR_pwr_down(int idx, int type)
 int FMR_get_chip_id(int idx, int *chipid)
 {
     int ret = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     FMR_ASSERT(FMR_cbk_tbl(idx).get_chip_id);
     FMR_ASSERT(chipid);
@@ -211,6 +240,10 @@ int FMR_get_rssi(int idx, int *rssi)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).get_rssi);
     FMR_ASSERT(rssi);
 
@@ -227,6 +260,10 @@ int FMR_get_ps(int idx, uint8_t **ps, int *ps_len)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).get_ps);
     FMR_ASSERT(ps);
     FMR_ASSERT(ps_len);
@@ -238,6 +275,10 @@ int FMR_get_ps(int idx, uint8_t **ps, int *ps_len)
 int FMR_get_rt(int idx, uint8_t **rt, int *rt_len)
 {
     int ret = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     FMR_ASSERT(FMR_cbk_tbl(idx).get_rt);
     FMR_ASSERT(rt);
@@ -251,6 +292,10 @@ int FMR_get_rt(int idx, uint8_t **rt, int *rt_len)
 int FMR_get_pi(int idx, uint16_t *pi)
 {
     int ret = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     FMR_ASSERT(FMR_cbk_tbl(idx).get_pi);
 
@@ -267,6 +312,10 @@ int FMR_get_ecc(int idx, uint8_t *ecc)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).get_ecc);
 
     ret = FMR_cbk_tbl(idx).get_ecc(FMR_fd(idx), &fmr_data.rds, ecc);
@@ -281,6 +330,10 @@ int FMR_get_ecc(int idx, uint8_t *ecc)
 int FMR_get_pty(int idx, uint8_t *pty)
 {
     int ret = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     FMR_ASSERT(FMR_cbk_tbl(idx).get_pty);
 
@@ -297,6 +350,10 @@ int FMR_tune(int idx, int freq)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).tune);
 
     ret = FMR_cbk_tbl(idx).tune(FMR_fd(idx), freq, fmr_data.cfg_data.band);
@@ -312,6 +369,10 @@ int FMR_tune(int idx, int freq)
 fm_bool FMR_DensenseDetect(fm_s32 idx, fm_u16 ChannelNo, fm_s32 RSSI)
 {
     fm_u8 bDesenseCh = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return fm_false;
+    }
 
     bDesenseCh = FMR_cbk_tbl(idx).desense_check(FMR_fd(idx), ChannelNo, RSSI);
     if (bDesenseCh == 1) {
@@ -366,6 +427,11 @@ return fm_true : need check cur_freq->valid
 static fm_bool FMR_Seek_TuneCheck(int idx, fm_softmute_tune_t *cur_freq)
 {
     int ret = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return fm_false;
+    }
+
     if (fmr_data.scan_stop == fm_true) {
         ret = FMR_tune(idx,fmr_data.cur_freq);
         LOGI("seek stop!!! tune ret=%d",ret);
@@ -399,6 +465,10 @@ static int FMR_Seek_More(int idx, fm_softmute_tune_t *validfreq, fm_u8 seek_dir,
 {
     fm_s32 i;
     fm_softmute_tune_t cur_freq;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     cur_freq.freq = validfreq->freq;
     cur_freq.rssi = 0;
@@ -438,6 +508,12 @@ int FMR_seek_Channel(int idx, int start_freq, int min_freq, int max_freq, int ba
 {
     fm_s32 i, ret = 0;
     fm_softmute_tune_t cur_freq;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
+    memset(&cur_freq, 0, sizeof(struct fm_softmute_tune_t));
 
     if (dir == 1)/*forward*/ {
         for (i=((start_freq-min_freq)/seek_space+1); i<band_channel_no; i++) {
@@ -547,6 +623,10 @@ int FMR_seek(int idx, int start_freq, int dir, int *ret_freq)
     fm_u16 min_freq, max_freq;
     int rssi;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     if ((start_freq < 7600) || (start_freq > 10800)) /*need replace by macro*/ {
         LOGE("%s error start_freq: %d\n", __func__, start_freq);
         return -ERR_INVALID_PARA;
@@ -586,6 +666,10 @@ int FMR_set_mute(int idx, int mute)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).set_mute)
 
     if ((mute < 0) || (mute > 1)) {
@@ -604,6 +688,10 @@ int FMR_is_fm_pwrup(int idx, int *pwrup)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).is_fm_pwrup);
     FMR_ASSERT(pwrup);
 
@@ -620,6 +708,10 @@ int FMR_is_rdsrx_support(int idx, int *supt)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).is_rdsrx_support);
     FMR_ASSERT(supt);
 
@@ -634,6 +726,10 @@ int FMR_is_rdsrx_support(int idx, int *supt)
 
 int FMR_Pre_Search(int idx)
 {
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     //avoid scan stop flag clear if stop cmd send before pre-search finish
     fmr_data.scan_stop = fm_false;
     FMR_ASSERT(FMR_cbk_tbl(idx).pre_search);
@@ -643,6 +739,10 @@ int FMR_Pre_Search(int idx)
 
 int FMR_Restore_Search(int idx)
 {
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).restore_search);
     FMR_cbk_tbl(idx).restore_search(FMR_fd(idx));
     return 0;
@@ -661,8 +761,11 @@ int FMR_scan_Channels(int idx, uint16_t *scan_tbl, int *max_cnt, fm_s32 band_cha
     fm_s32 NF = 0;
     fm_bool F[3] = {fm_false, fm_false, fm_false};
     fm_s32 F_Rssi[3] = {0};
-    fm_u8 NF_Idx = 0;
 #endif
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     memset(SortData, 0, CQI_CH_NUM_MAX*sizeof(struct fm_cqi));
     LOGI("band_channel_no=[%d], seek_space=%d, start freq=%d, NF_Space=%d\n", band_channel_no,seek_space,Start_Freq, NF_Space);
@@ -708,6 +811,9 @@ int FMR_scan_Channels(int idx, uint16_t *scan_tbl, int *max_cnt, fm_s32 band_cha
                     LastExist = fm_false;
                     continue;
                 }
+                if (Num < 0 || Num >= CQI_CH_NUM_MAX) {
+                    continue;
+                }
                 SortData[Num].ch = cur_freq.freq;
                 SortData[Num].rssi = cur_freq.rssi;
                 SortData[Num].reserve = 1;
@@ -745,14 +851,13 @@ int FMR_scan_Channels(int idx, uint16_t *scan_tbl, int *max_cnt, fm_s32 band_cha
             }
             Pacc = 0;
             Nacc = 0;
-            for (j=NF_Idx; j<Num; j++) {
-                if (SortData[j].rssi < (NF+FM_NOISE_FLOOR_OFFSET)) {
-                    LOGI("FM Noise FLoor Detected:freq=[%d] NF=[%d] \n", SortData[j].ch,NF);
+            for (j = 0; j < Num; j++) {
+                if (SortData[j].rssi < (NF + FM_NOISE_FLOOR_OFFSET)) {
+                    LOGI("FM Noise FLoor Detected:freq=[%d] NF=[%d] \n", SortData[j].ch, NF);
                     SortData[j].reserve = 0;
                 }
             }
-            NF_Idx = j;
-            LOGI("FM Noise FLoor NF_Idx[%d] \n", NF_Idx);
+            LOGI("FM Noise FLoor NF_Idx[%d] \n", j);
         }
 #endif
     }
@@ -810,6 +915,10 @@ int FMR_scan(int idx, uint16_t *scan_tbl, int *max_cnt)
     fm_u16 Start_Freq = 8750;
     fm_u8 NF_Space = 41;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     //FM radio seek space,5:50KHZ; 1:100KHZ; 2:200KHZ
     if (fmr_data.cfg_data.seek_space == 5) {
         seek_space = 5;
@@ -848,6 +957,10 @@ int FMR_turn_on_off_rds(int idx, int onoff)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).turn_on_off_rds)
     ret = FMR_cbk_tbl(idx).turn_on_off_rds(FMR_fd(idx), onoff);
     if (ret) {
@@ -860,6 +973,10 @@ int FMR_turn_on_off_rds(int idx, int onoff)
 int FMR_read_rds_data(int idx, uint16_t *rds_status)
 {
     int ret = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     FMR_ASSERT(FMR_cbk_tbl(idx).read_rds_data);
     FMR_ASSERT(rds_status);
@@ -874,6 +991,10 @@ int FMR_read_rds_data(int idx, uint16_t *rds_status)
 int FMR_active_af(int idx, uint16_t orig_pi, uint16_t *ret_freq)
 {
     int ret = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     FMR_ASSERT(FMR_cbk_tbl(idx).active_af);
     FMR_ASSERT(ret_freq);
@@ -898,6 +1019,10 @@ int FMR_active_ta(int idx, uint16_t *ret_freq)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).active_ta);
     FMR_ASSERT(ret_freq);
     ret = FMR_cbk_tbl(idx).active_ta(FMR_fd(idx),
@@ -921,6 +1046,10 @@ int FMR_deactive_ta(int idx, uint16_t *ret_freq)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).deactive_ta);
     FMR_ASSERT(ret_freq);
     ret = FMR_cbk_tbl(idx).deactive_ta(FMR_fd(idx),
@@ -939,9 +1068,14 @@ int FMR_deactive_ta(int idx, uint16_t *ret_freq)
     LOGD("%s, [ret=%d]\n", __func__, ret);
     return ret;
 }
+
 int FMR_ana_switch(int idx, int antenna)
 {
     int ret = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     FMR_ASSERT(FMR_cbk_tbl(idx).ana_switch);
 
@@ -963,6 +1097,10 @@ int FMR_get_badratio(int idx, int *badratio)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).get_badratio);
     FMR_ASSERT(badratio);
 
@@ -979,6 +1117,10 @@ int FMR_get_badratio(int idx, int *badratio)
 int FMR_get_stereomono(int idx, int *stemono)
 {
     int ret = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     FMR_ASSERT(FMR_cbk_tbl(idx).get_stereomono);
     FMR_ASSERT(stemono);
@@ -997,6 +1139,10 @@ int FMR_set_stereomono(int idx, int stemono)
 {
     int ret = 0;
 
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).set_stereomono);
 
     ret = FMR_cbk_tbl(idx).set_stereomono(FMR_fd(idx), stemono);
@@ -1011,6 +1157,10 @@ int FMR_set_stereomono(int idx, int stemono)
 int FMR_get_caparray(int idx, int *caparray)
 {
     int ret = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     FMR_ASSERT(FMR_cbk_tbl(idx).get_caparray);
     FMR_ASSERT(caparray);
@@ -1030,6 +1180,10 @@ int FMR_get_hw_info(int idx, int **info, int *info_len)
     int ret = 0;
     static int inited = 0;
     static int info_array[10] = {0};
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     FMR_ASSERT(FMR_cbk_tbl(idx).get_hw_info);
     FMR_ASSERT(info);
@@ -1055,12 +1209,17 @@ int FMR_get_hw_info(int idx, int **info, int *info_len)
     return ret;
 }
 /*
-th_idx:
+th_idx: 
 	threshold type: 0, RSSI. 1,desense RSSI. 2,SMG.
 th_val: threshold value*/
 int FMR_EMSetTH(int idx, int th_idx, int th_val)
 {
     int ret = -1;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
+
     FMR_ASSERT(FMR_cbk_tbl(idx).set_search_threshold);
     ret=FMR_cbk_tbl(idx).set_search_threshold(FMR_fd(idx),th_idx,th_val);
 
@@ -1072,6 +1231,10 @@ int FMR_EM_CQI_logger(int idx,uint16_t cycle)
     int ret = -1;
     fm_full_cqi_log_t log_setting;
     uint i = 0;
+
+    if (idx < 0 || idx >= FMR_MAX_IDX) {
+        return -1;
+    }
 
     FMR_ASSERT(FMR_cbk_tbl(idx).full_cqi_logger);
 
@@ -1098,3 +1261,4 @@ int FMR_EM_CQI_logger(int idx,uint16_t cycle)
 
     return ret;
 }
+

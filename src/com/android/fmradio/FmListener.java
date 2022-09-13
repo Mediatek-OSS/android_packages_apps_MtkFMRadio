@@ -61,6 +61,7 @@ public interface FmListener {
     String KEY_PS_INFO = "key_ps_info";
     String KEY_RT_INFO = "key_rt_info";
     String KEY_STATION_NUM = "key_station_num";
+    String KEY_IS_STEREOMONO = "key_is_stereomono";
 
     // Audio focus related
     String KEY_AUDIOFOCUS_CHANGED = "key_audiofocus_changed";
@@ -110,6 +111,8 @@ public interface FmListener {
     int NOT_AUDIO_FOCUS = 33;
 
     int MSGID_BT_STATE_CHANGED = 34;
+
+    int MSGID_STEROMONO_FINISHED = 35;
 
     // For refresh time
     int MSGID_REFRESH = 101;

@@ -28,7 +28,12 @@ static char tmp[20] = {0};
 
 char *FMR_strerr()
 {
-    sprintf(tmp, "%d", fmr_err);
+    int ret = 0;
+
+    ret = sprintf(tmp, "%d", fmr_err);
+    if (ret < 0) {
+        LOGE("%s sprintf fail\n", __func__);
+    }
 
     return tmp;
 }

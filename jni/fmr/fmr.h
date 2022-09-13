@@ -263,6 +263,7 @@ int COM_restore_search(int fd);
 int COM_set_search_threshold(int fd, int th_idx,int th_val);
 int COM_full_cqi_logger(int fd, fm_full_cqi_log_t *log_parm);
 
+void CUST_update_cfg(struct CUST_cfg_ds *cfg, int chipid);
 int CUST_get_cfg(struct CUST_cfg_ds *cfg);
 
 #define FMR_ASSERT(a) { \

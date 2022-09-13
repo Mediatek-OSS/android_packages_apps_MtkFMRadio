@@ -50,7 +50,6 @@ import com.android.fmradio.FmStation.Station;
 import com.android.fmradio.dialogs.FmSaveDialog;
 import com.android.fmradio.views.FmVisualizerView;
 
-//import static android.Manifest.permission.READ_MEDIA_AUDIO;
 
 /**
  * This class interact with user, FM recording function.
@@ -195,24 +194,11 @@ public class FmRecordActivity extends Activity implements
         super.onResume();
         Log.d(TAG, "onResume " + mService);
         int recordAudioPermission = checkSelfPermission(Manifest.permission.RECORD_AUDIO);
-        int readExtStorage = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
-        int writeExtStorage = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        //int readMediaAudio = checkSelfPermission(android.Manifest.permission.READ_MEDIA_AUDIO);
         boolean mRequest = false;
         if (recordAudioPermission != PackageManager.PERMISSION_GRANTED) {
             mIsPermissionsRevoked = true;
         }
 
-        if (readExtStorage != PackageManager.PERMISSION_GRANTED) {
-            mIsPermissionsRevoked = true;
-        }
-        if (writeExtStorage != PackageManager.PERMISSION_GRANTED) {
-            mIsPermissionsRevoked = true;
-        }
-     /* if (readMediaAudio != PackageManager.PERMISSION_GRANTED) {
-            mIsPermissionsRevoked = true;
-        }
-        */
         if (mIsPermissionsRevoked == true) {
             Log.w(TAG, "onResume: Closing activity due to permissions revoked in bg.");
             finish();
@@ -533,9 +519,11 @@ public class FmRecordActivity extends Activity implements
         // convert single quote to double to handle in sql query
         videoPath = videoPath.replaceAll("'", "''");
         Log.d(TAG, "transcodeSchemeFileUri, audiopath " + videoPath);
+        Uri volExternalPrimaryContentUri = MediaStore.Audio.Media
+                .getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
         try {
             cursor = mContext.getContentResolver()
-                  .query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                  .query(volExternalPrimaryContentUri,
                   new String[] { MediaStore.Audio.Media._ID },
                   MediaStore.Audio.Media.DATA + " = '"
                   + videoPath + "'", null, null);
@@ -543,7 +531,7 @@ public class FmRecordActivity extends Activity implements
                     && cursor.getCount() > 0) {
                 int id = cursor.getInt(0);
                 newUri = ContentUris.withAppendedId(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
+                    volExternalPrimaryContentUri, id);
                 Log.d(TAG, "transcodeSchemeFileUri, newUri = " + newUri);
             } else {
                 newUri = uri;
@@ -568,7 +556,7 @@ public class FmRecordActivity extends Activity implements
             Uri contentUri =
                     transcodeSchemeFileUri(Uri.parse("file://" + FmService.getRecordingSdcard()
                     + File.separator + FmRecorder.FM_RECORD_FOLDER + File.separator
-                    + Uri.encode(recordName) + FmRecorder.RECORDING_FILE_EXTENSION));
+                    + Uri.encode(recordName) + FmRecorder.RECORDING_FILE_3GGP_3GA_EXTENSION));
             intent.setData(contentUri);
         }
         setResult(RESULT_OK, intent);
